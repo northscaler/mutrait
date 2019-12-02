@@ -9,13 +9,13 @@ stages:
 
 build:
   stage: build
-  image: mhart/alpine-node:8
+  image: node:8-alpine
   script:
     - npm run build
 
 publish:
   stage: publish
-  image: mhart/alpine-node:8
+  image: node:8-alpine
   script:
     - *authenticate-to-npmjs
     - npm install
