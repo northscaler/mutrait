@@ -15,20 +15,23 @@
   ],
   "license": "MIT",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=8.6.0"
   },
   "main": "index.js",
   "scripts": {
     "build": "npm install && npm test",
     "transpile": "run-s transpile-main transpile-test",
-    "transpile-main": "babel --delete-dir-on-start --verbose --out-dir lib/main --copy-files src/main",
+    "clean": "rimraf lib/main",
+    "copy-src": "mkdirp lib/main/src && cp -r src/main/* lib/main/src",
+    "pretranspile-main": "run-s clean copy-src",
+    "transpile-main": "babel --verbose --out-dir lib/main --copy-files lib/main/src",
     "transpile-test": "babel --delete-dir-on-start --verbose --out-dir lib/test --copy-files src/test",
     "unit-integration": "nyc --check-coverage -x 'lib/test' --exclude-after-remap false mocha -u tdd 'lib/test/unit/**/*.spec.js' 'lib/test/integration/**/*.spec.js'",
     "postunit-integration": "run-s report",
-    "integration": "nyc --check-coverage -x 'lib/test' --exclude-after-remap false mocha -u tdd 'lib/test/integration/**/*.spec.js'",
+    "integration": "nyc -x 'lib/test' --exclude-after-remap false mocha -u tdd 'lib/test/integration/**/*.spec.js'",
     "postintegration": "run-s report",
     "i": "mocha -u tdd 'src/test/integration/**/*.spec.js' | npx bunyan",
-    "unit": "nyc --check-coverage -x 'lib/test' --exclude-after-remap false mocha -u tdd 'lib/test/unit/**/*.spec.js'",
+    "unit": "nyc -x 'lib/test' --exclude-after-remap false mocha -u tdd 'lib/test/unit/**/*.spec.js'",
     "postunit": "run-s report",
     "u": "mocha -u tdd 'src/test/unit/**/*.spec.js' | npx bunyan",
     "test": "run-s transpile unit-integration lint",
@@ -36,11 +39,12 @@
     "cov": "open coverage/index.html",
     "lint": "standard --verbose 'src/**/*.js'",
     "format": "standard --fix 'src/**/*.js'",
-    "make-distribution": "run-s transpile finalize-distribution",
-    "finalize-distribution": "copyfiles --verbose package.json package-lock.json README.md LICENSE lib/main",
+    "make-distribution": "run-s transpile finalize-distribution doc",
+    "finalize-distribution": "cp package.json package-lock.json README.md LICENSE lib/main",
+    "doc": "jsdoc --verbose -d lib/main/doc -r -c jsdoc.json -R lib/main/README.md lib/main",
     "prelink": "run-s make-distribution",
-    "link": "mkdir -p lib/main && cd lib/main && npm link; cd ../..",
-    "unlink": "mkdir -p lib/main && cd lib/main && npm unlink; cd ../.."
+    "link": "mkdirp lib/main && cd lib/main && npm link; cd ../..",
+    "unlink": "mkdirp lib/main && cd lib/main && npm unlink; cd ../.."
   },
   "publishConfig": {
     "access": "public"
@@ -60,6 +64,7 @@
     "chai": "4.2.0",
     "copyfiles": "2.1.1",
     "dirty-chai": "2.0.1",
+    "jsdoc": "3.6.3",
     "mocha": "6.2.2",
     "npm-cli-login": "0.1.1",
     "npm-run-all": "4.1.5",

@@ -1,0 +1,74 @@
+#####
+# This script takes care of proper tag management for npm packages, including stable, next & latest tags.
+# Typically, you'll have tags called `latest`, `stable-1.0`, `stable-1.1`, ..., `next-1.1`, `next-1.2`, ...
+# Run `npm dist-tag ls @northscaler/string-support` for an example.
+#
+# NB: The 'RM' prefix stands for "Release Management".
+#
+# This script is intended to run immediately after publishing to npm with a temporary tag with an invocation similar to:
+# $ export RM_TMP_TAG=cicd-$(date +%s)
+# $ npm publish --tag $RM_TMP_TAG
+#
+# It has reasonable defaults.  Override by providing environment variables as documented below.
+#####
+
+#### Begin configurable environment variables
+RM_PKG_JSON=${RM_PKG_JSON:-./package.json}
+RM_STABLE=${RM_STABLE:-stable}
+RM_NEXT=${RM_NEXT:-next}
+
+RM_LATEST=${RM_LATEST:-latest}
+RM_TMP_TAG=${RM_TMP_TAG:-$RM_LATEST}
+##### End configurable environment variables
+
+echo "RM_PKG_JSON=$RM_PKG_JSON"
+echo "RM_STABLE=$RM_STABLE"
+echo "RM_NEXT=$RM_NEXT"
+echo "RM_LATEST=$RM_LATEST"
+echo "RM_TMP_TAG=$RM_TMP_TAG"
+
+RM_PKG_NAME=$(node -e "process.stdout.write(require('$RM_PKG_JSON').name)")
+RM_PKG_VERSION=$(node -e "process.stdout.write(require('$RM_PKG_JSON').version)")
+RM_PKG_MINOR_VERSION=$(echo -n "$RM_PKG_VERSION" | egrep -o '^\d+\.\d+')
+RM_GREATEST_MINOR_STABLE_VERSION=$(RM_DIST_TAGS="$(npm show --json $RM_PKG_NAME dist-tags 2>/dev/null)" \
+  node -e "console.log(Object.keys(JSON.parse(process.env.RM_DIST_TAGS)).filter(it=>it.startsWith('$RM_STABLE')).map(it=>/\d+\.\d+$/.exec(it)).join('\n'))" |
+  sort -t . -k 1,1n -k 2,2n | tail -1)
+
+RM_GREATEST_MINOR_STABLE_VERSION=${RM_GREATEST_MINOR_STABLE_VERSION:-$RM_PKG_MINOR_VERSION}
+
+RM_TAG_PREFIX=$RM_STABLE
+if echo -n "$RM_PKG_VERSION" | egrep -q '\-[^\.]+\.\d+$'; then RM_TAG_PREFIX=$RM_NEXT; fi # use "next" if a semver prerelease
+RM_TAG="$RM_TAG_PREFIX-$RM_PKG_MINOR_VERSION"
+
+echo "RM_PKG_NAME=$RM_PKG_NAME"
+echo "RM_PKG_VERSION=$RM_PKG_VERSION"
+echo "RM_PKG_MINOR_VERSION=$RM_PKG_MINOR_VERSION"
+echo "RM_GREATEST_MINOR_STABLE_VERSION=$RM_GREATEST_MINOR_STABLE_VERSION"
+echo "RM_TAG_PREFIX=$RM_TAG_PREFIX"
+echo "RM_TAG=$RM_TAG"
+
+CMD="npm dist-tag add $RM_PKG_NAME@$RM_PKG_VERSION $RM_TAG"
+echo "$CMD"
+$CMD
+
+if [ "$RM_TAG_PREFIX" == "$RM_STABLE" ]; then # this is a stable release
+  RM_VERSIONS="$RM_GREATEST_MINOR_STABLE_VERSION.0 $RM_PKG_MINOR_VERSION.0"
+  if [ "$RM_VERSIONS" == "$(npx -q semver $RM_VERSIONS | tr '\n' ' ' | xargs)" ]; then # we've published the latest version
+    CMD="npm dist-tag add $RM_PKG_NAME@$RM_PKG_VERSION $RM_LATEST" # now add "latest" tag
+    echo "$CMD"
+    $CMD
+  fi
+
+  if npm dist-tag ls | egrep -q "^$RM_NEXT-$RM_PKG_MINOR_VERSION:"; then # if a "next-x.y" tag exists, rm it
+    CMD="npm dist-tag rm $RM_PKG_NAME $RM_NEXT-$RM_PKG_MINOR_VERSION"
+    echo "$CMD"
+    $CMD
+  fi
+fi
+
+if npm dist-tag ls | egrep -q "^$RM_TMP_TAG:"; then # try to rm temporary tag if present
+  set +e
+  CMD="npm dist-tag rm $RM_PKG_NAME $RM_TMP_TAG"
+  echo "$CMD"
+  $CMD
+fi
