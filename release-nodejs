@@ -50,7 +50,7 @@ echo "INFO: using project file: $PACKAGE_JSON"
 
 FX_nodejs=fx
 if [ -n "$NO_USE_LOCAL_FX" ] || ! which $FX_nodejs; then
-  FX_nodejs="docker run -v "$(pwd)"/$PACKAGE_JSON:/$PACKAGE_JSON scispike/fx:latest $PACKAGE_JSON"
+  FX_nodejs="docker run --rm -v "$(pwd)"/$PACKAGE_JSON:/$PACKAGE_JSON scispike/fx:latest $PACKAGE_JSON"
 fi
 
 getVersion_nodejs() {
