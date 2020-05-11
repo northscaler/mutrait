@@ -2,5 +2,17 @@
 
 THIS_ABSPATH="$(cd "$(dirname "$0")"; pwd)"
 
-"$THIS_ABSPATH/release" nodejs $@
+TYPES=${TYPES:-nodejs}
 
+REF=${REF:-master}
+get() {
+  curl -s -o $1 https://gitlab.com/northscaler-public/release-management/-/raw/$REF/$1 && chmod +x $1
+}
+
+get release
+for it in $TYPES; do
+    get release-$it
+done
+get tag-nodejs
+
+./release $(echo -n "$TYPES" | tr ' ' '+') $@
