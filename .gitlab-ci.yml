@@ -3,8 +3,6 @@
     echo "$NPM_SCOPE:registry=https://$NPM_REGISTRY_HOST/" >> ~/.npmrc
     echo "//$NPM_REGISTRY_HOST/:_authToken=$NPM_TOKEN" >> ~/.npmrc
 
-image: node:8.6.0-alpine
-
 cache:
   paths:
     - node_modules/
@@ -17,20 +15,58 @@ stages:
   - build
   - publish
 
-build:
+build-8:
   stage: build
+  image: node:8.17.0-alpine
+  script:
+    - npm run build
+
+build-9:
+  stage: build
+  image: node:9.11.2-alpine
+  script:
+    - npm run build
+
+build-10:
+  stage: build
+  image: node:10.20.1-alpine
+  script:
+    - npm run build
+
+build-11:
+  stage: build
+  image: node:11.15.0-alpine
+  script:
+    - npm run build
+
+build-12:
+  stage: build
+  image: node:12.16.3-alpine
+  script:
+    - npm run build
+
+build-13:
+  stage: build
+  image: node:13.14.0-alpine
+  script:
+    - npm run build
+
+build-14:
+  stage: build
+  image: node:14.1.0-alpine
   script:
     - npm run build
 
 publish:
   stage: publish
+  image: node:14.1.0-alpine
   script:
     - *authenticate-to-npmjs
+    - npm install
     - npm run make-distribution
-    - cd lib/main
     - npm shrinkwrap
     - export RM_TMP_TAG=cicd-$(date +%s)
     - npm publish --access public --tag $RM_TMP_TAG
-    - ../../tag-nodejs
+    - ./tag-nodejs
   only:
     - /^\d+\.\d+\.\d+(\-[^\.]+\.\d+)?$/

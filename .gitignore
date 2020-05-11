@@ -1,15 +1,15 @@
-lib/
-.firebaserc
-firebase.json
-.firestore.indexes.*.json
-.firestore.*.rules
-!.firestore.indexes.default.json
-!.firestore.default.rules
 
-# Created by https://www.gitignore.io/api/node,macos,windows,linux,jetbrains+all,eclipse
+# Created by https://www.gitignore.io/api/macos,linux,windows,jetbrains+all,eclipse,code,node
+# Edit at https://www.gitignore.io/?templates=macos,linux,windows,jetbrains+all,eclipse,code,node
+
+### Code ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
 ### Eclipse ###
-
 .metadata
 bin/
 tmp/
@@ -112,6 +112,8 @@ local.properties
 # .idea/modules.xml
 # .idea/*.iml
 # .idea/modules
+# *.iml
+# *.ipr
 
 # CMake
 cmake-build-*/
@@ -158,6 +160,9 @@ fabric.properties
 modules.xml
 .idea/misc.xml
 *.ipr
+
+# Sonarlint plugin
+.idea/sonarlint
 
 ### Linux ###
 *~
@@ -209,6 +214,10 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Runtime data
 pids
@@ -221,6 +230,7 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+*.lcov
 
 # nyc test coverage
 .nyc_output
@@ -244,6 +254,9 @@ jspm_packages/
 # TypeScript v1 declaration files
 typings/
 
+# TypeScript cache
+*.tsbuildinfo
+
 # Optional npm cache directory
 .npm
 
@@ -261,6 +274,7 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.test
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -271,15 +285,37 @@ typings/
 # nuxt.js build output
 .nuxt
 
+# rollup.js default build output
+dist/
+
+# Uncomment the public line if your project uses Gatsby
+# https://nextjs.org/blog/next-9-1#public-directory-support
+# https://create-react-app.dev/docs/using-the-public-folder/#docsNav
+# public
+
+# Storybook build outputs
+.out
+.storybook-out
+
 # vuepress build output
 .vuepress/dist
 
 # Serverless directories
-.serverless
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# Temporary folders
+temp/
 
 ### Windows ###
 # Windows thumbnail cache files
 Thumbs.db
+Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
 
@@ -302,5 +338,8 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-
-# End of https://www.gitignore.io/api/node,macos,windows,linux,jetbrains+all,eclipse
+# End of https://www.gitignore.io/api/macos,linux,windows,jetbrains+all,eclipse,code,node
+# the above line is passed to gitignore.io; add anything custom below, then execute .gitignore.sh
+release*
+docs/
+dist/
