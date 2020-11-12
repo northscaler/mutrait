@@ -1,3 +1,5 @@
+set -e
+
 #####
 # This script takes care of proper tag management for npm packages, including stable, next & latest tags.
 # Typically, you'll have tags called `latest`, `stable-1.0`, `stable-1.1`, ..., `next-1.1`, `next-1.2`, ...
@@ -19,6 +21,7 @@ RM_NEXT=${RM_NEXT:-next}
 
 RM_LATEST=${RM_LATEST:-latest}
 RM_TMP_TAG=${RM_TMP_TAG:-$RM_LATEST}
+RM_KEEP_TMP_TAG=${RM_KEEP_TMP_TAG} # set to 1 to avoid deletion of tag RM_TMP_TAG
 ##### End configurable environment variables
 
 echo "RM_PKG_JSON=$RM_PKG_JSON"
@@ -89,7 +92,7 @@ if [ "$RM_TAG_PREFIX" == "$RM_NEXT" ]; then # this is a next-x.y release
 fi
 
 
-if npm dist-tag ls 2> /dev/null | egrep -q "^$RM_TMP_TAG:"; then # try to rm temporary tag if present
+if [ -z "$RM_KEEP_TMP_TAG" ] && npm dist-tag ls 2> /dev/null | egrep -q "^$RM_TMP_TAG:"; then # try to rm temporary tag if present
   CMD="npm dist-tag rm $RM_PKG_NAME $RM_TMP_TAG"
   echo "$CMD"
   $CMD
