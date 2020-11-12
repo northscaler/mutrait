@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1><code>@northscaler/mutrait</code></h1>
+<p>(formerly <a href="https://github.com/SciSpike/mutrait">mutrait</a>, formerly <a href="https://github.com/justinfagnani/mixwith.js">mixwith.js</a>)</p>
+<p>A simple and powerful trait library for ES6+.</p>
+<p>Mutrait uses a subclass factory strategy to introduce traits into classes (also known as &quot;mixins&quot;), along with some nice syntax sugar.
+It allows classes to override methods coming from not only superclasses, but also traits, and it allows traits to override methods from supertraits.</p>
+<h2>Hello, World!</h2>
+<pre class="prettyprint source lang-javascript"><code>const { Trait, trait } = require('@northscaler/mutrait')      // 0
+
+const CanSayHello = Trait(s => class extends s { // 1
+  sayHello () {
+    return 'Hello, world!'
+  }
+})
+
+class Person extends trait(CanSayHello) {}       // 2
+
+const person = new Person()
+
+console.log(person.sayHello())                   // 3
+// logs 'Hello, world'
+</code></pre>
+<p>0: Uses <code>Trait</code> &amp; <code>trait</code> from <code>@northscaler/mutrait</code></p>
+<p>1: Defines a new trait that imparts a <code>sayHello</code> method.</p>
+<p>2: Defines a class that expresses the <code>CanSayHello</code> trait and doesn't extend anything.</p>
+<p>3: Invokes the <code>sayHello</code> method provided by the <code>CanSayHello</code> trait.</p>
+<pre class="prettyprint source lang-javascript"><code>class Klingon extends Person {
+  sayHello() {
+    return 'nuqneH!'                             // 4
+  }
+}
+console.log(new Klingon().sayHello())
+// logs 'nuqneH!'
+</code></pre>
+<p>4: Demonstrates that classes can override methods provided by traits.</p>
+<h2>Expressing Multiple Traits</h2>
+<pre class="prettyprint source lang-javascript"><code>const { Trait, traits } = require('@northscaler/mutrait')  // 0
+
+const CanSayHello = Trait(s => class extends s {           // 1
+  sayHello () {
+    return 'Hello, world!'
+  }
+})
+
+const CanSayGoodbye = Trait(s => class extends s {         // 2
+  sayGoodbye () {
+    return 'Goodbye, world!'
+  }
+})
+
+class Person extends traits(CanSayHello, CanSayGoodbye) {} // 3
+
+const person = new Person()
+
+console.log(person.sayHello())                             // 4
+// logs 'Hello, world'
+console.log(person.sayGoodbye())                           // 5
+// logs 'Goodbye, world'
+</code></pre>
+<p>0: Uses <code>Trait</code> &amp; <code>traits</code> from <code>@northscaler/mutrait</code></p>
+<p>1: Defines a trait that imparts a <code>sayHello</code> method</p>
+<p>2: Defines a trait that imparts a <code>sayGoodbye</code> method</p>
+<p>3: Defines a class that expresses the <code>CanSayHello</code> &amp; <code>CanSayGoodbye</code> traits and doesn't extend anything.</p>
+<p>4: Invokes the <code>sayHello</code> method provided by <code>CanSayHello</code>.</p>
+<p>5: Invokes the <code>sayGoodbye</code> method provided by <code>CanSayGoodbye</code>.</p>
+<h2>More Realistic Example</h2>
+<pre class="prettyprint source lang-javascript"><code>const { Trait, trait } = require('@northscaler/mutrait')
+
+const Nameable = Trait(s => class extends s {
+  constructor () {
+    super(...arguments)
+    this._firstName = ''
+    this._lastName = ''
+  }
+
+  get fullName () {
+    return `${this._firstName} ${this._lastName}`
+  }
+
+  set firstName (it) {
+    this._firstName = this.checkFirstName(it)
+  }
+
+  get firstName () {
+    return this._firstName
+  }
+
+  checkFirstName (it) {
+    return it
+  }
+
+  set lastName (it) {
+    this._lastName = this.checkLastName(it)
+  }
+
+  get lastName () {
+    return this._lastName
+  }
+
+  checkLastName (it) {
+    return it
+  }
+})
+
+class Person extends trait(Nameable) {
+  checkFirstName (it) {
+    if (!it) throw new Error('nothing given')
+    return it
+  }
+
+  checkLastName (it) {
+    if (!it) throw new Error('nothing given')
+    return it
+  }
+}
+
+const first = 'Cheeky'
+const last = 'Monkey'
+const me = new Person()
+me.firstName = first
+me.lastName = last
+assert.equal(first, me._firstName)
+assert.equal(last, me._lastName)
+assert.equal(first, me.firstName)
+assert.equal(last, me.lastName)
+assert.equal(`${first} ${last}`, me.fullName)
+
+assert.throws(() => {
+  me.firstName = null
+})
+assert.throws(() => {
+  me.lastName = null
+})
+</code></pre>
+<h2>Features</h2>
+<ul>
+<li><code>super</code> Just Works™.</li>
+<li><code>instanceof</code> Just Works™ with classes <em>and</em> traits.</li>
+<li>Traits can have constructors and instance methods &amp; fields that are accessible to any class or trait involved.</li>
+</ul>
+<h3>Syntax Sugar</h3>
+<p><code>@northscaler/mutrait</code> provides helpers <code>Trait</code>, <code>superclass</code>, <code>traits</code>, <code>trait</code> &amp; <code>expressing</code> that ease in readability in various cases:</p>
+<ul>
+<li>Use <code>Trait</code> to define a trait:</li>
+</ul>
+<pre class="prettyprint source lang-javascript"><code>const MyTrait = Trait(s => class extends s {})
+</code></pre>
+<ul>
+<li>Use <code>trait</code> when your class declares no superclass and expresses a single trait:</li>
+</ul>
+<pre class="prettyprint source lang-javascript"><code>class Thing extends trait(MyTrait) {}
+</code></pre>
+<ul>
+<li>Use <code>traits</code> when your class declares no superclass and expresses a multiple traits:</li>
+</ul>
+<pre class="prettyprint source lang-javascript"><code>class Thing extends traits(MyTrait, MyOtherTrait) {}
+</code></pre>
+<blockquote>
+<p>NOTE:
+<code>traits</code> &amp; <code>trait</code> are the same function.
+They're provided simply for readability's sake.
+Use whichever reads better for you.</p>
+</blockquote>
+<ul>
+<li>Use <code>superclass().expressing()</code> when your class declares a superclass <em>and</em> expresses one or more traits:</li>
+</ul>
+<pre class="prettyprint source lang-javascript"><code>class Thing extends superclass(MySuper).expressing(MyTrait, MyOtherTrait) {}
+</code></pre>
+<h2>Advantages of subclass factory-based traits over typical JavaScript mixins</h2>
+<p>Subclass factory style mixins preserve the object-oriented inheritance properties that classes provide, like method overriding and <code>super</code> calls, while letting you compose classes out of traits without being constrained to a single inheritance hierarchy, and without monkey-patching or copying.</p>
+<h4>Method overriding that just works</h4>
+<p>Methods in subclasses can naturally override methods in the trait or superclass, and traits can override methods in the superclass or supertraits.
+This means that precedence is preserved - the order is: <em>subclass</em> -&gt; <em>trait__1</em> -&gt; ... -&gt; <em>trait__N</em> -&gt; <em>superclass</em>.</p>
+<h4><code>super</code> works</h4>
+<p>Subclasses and traits can use <code>super</code> normally, as defined in standard Javascript, and without needing the trait library to do special chaining of functions.</p>
+<h4>Traits can have constructors</h4>
+<p>Since <code>super()</code> works, traits can define constructors.
+Combined with ES6 rest arguments and the spread operator, traits can have generic constructors that work with any superconstructor by passing along all arguments.</p>
+<h4>Prototypes and instances are not mutated</h4>
+<p>Typical JavaScript mixins usually either mutate each instance as created, which can be bad for performance and maintainability, or modify a prototype, which means every object inheriting from that prototype gets the mixin.
+Subclass factories don't mutate objects, they define new classes, leaving the original superclass intact.</p>
+<h2>Usage</h2>
+<h3>Defining Traits</h3>
+<p>The <code>Trait</code> decorator function wraps a plain subclass factory to add deduplication, caching and <code>instanceof</code> support:</p>
+<pre class="prettyprint source lang-javascript"><code>const { Trait } = require('@northscaler/mutrait')
+
+const MyTrait = Trait(s => class extends s {
+
+  constructor() {
+    super(...argsuments)
+    // any further initialization here
+  }
+
+  foo() {
+    console.log('foo from MyTrait')
+    // this will call superclass.foo() if it exists
+    super.foo()
+  }
+})
+</code></pre>
+<p>Traits defined with the <code>@northscaler/mutrait</code> decorators do not require any helpers to use.
+They still work like plain subclass factories.</p>
+<h3>Using Traits</h3>
+<p>Classes use traits in their <code>extends</code> clause.
+Classes that use traits can define and override constructors, methods &amp; fields as usual.</p>
+<pre class="prettyprint source lang-javascript"><code>class MyClass extends superclass(MySuperClass).expressing(MyTrait) {
+
+  constructor(a, b) {
+    super(a, b); // calls MyTrait(a, b)
+  }
+
+  foo() {
+    console.log('foo from MyClass');
+    super.foo(); // calls MyTrait.foo()
+  }
+}
+</code></pre>
+<h3>Subtraits</h3>
+<p>There may be time when you have a trait that requires other traits; this can be considering a <code>subtrait</code>.
+This is achieved by having a trait subclass a given class that expresses all required supertraits.
+The pattern for that follows.</p>
+<pre class="prettyprint source lang-javascript"><code>const Supertrait1 = Trait(s => class extends s {                    // 1
+  foo () { return 'foo from Supertrait1' }
+  bar () { return 'bar from Supertrait1' }
+  snafu () { return 'snafu from Supertrait1' }
+})
+
+const Supertrait2 = Trait(s => class extends s {                    // 2
+  foo () { return 'foo from Supertrait2' }
+  bar () { return 'bar from Supertrait2' }
+  snafu () { return 'snafu from Supertrait2' }
+})
+
+const Subtrait = Trait(s =>
+  class extends superclass(s).expressing(Supertrait1, Supertrait2) { // 3
+    bar () { return 'bar from Subtrait' }
+    snafu () { return 'snafu from Subtrait' }
+  })
+
+class C extends trait(Subtrait) {                                    // 4
+  snafu () { return 'snafu from C' }
+}
+
+const c = new C()
+assert.equal(c.foo(), 'foo from Supertrait2')                        // 5
+assert.equal(c.bar(), 'bar from Subtrait')
+assert.equal(c.snafu(), 'snafu from C')
+assert.isTrue(c instanceof Subtrait)
+assert.isTrue(c instanceof Supertrait2)
+assert.isTrue(c instanceof Supertrait1)
+</code></pre>
+<p>1: Some conventional trait.</p>
+<p>2: Another conventional trait.</p>
+<p>3: Pattern that illustrates a subtrait that requires the two supertraits.
+The order of overriding is &quot;last one wins&quot;.
+In this case, <code>C</code> overrides <code>Subtrait</code> overrides <code>Subtrait2</code> overrides <code>Subtrait1</code>.</p>
+<h2>Credits</h2>
+<p>Credit is most certainly due to <a href="https://github.com/justinfagnani/mixwith.js">mixwith.js</a> for wrapping such a nice bow around mixins.
+It appeared to be an unmaintained project, so we copied it &amp; created this one.</p>
+<p><code>@northscaler/mutrait</code>is largely just a renaming from &quot;mixin&quot; to &quot;trait&quot;, with some minor adjustments &amp; bugfixes here &amp; there, plus it's managed under a minor-release-per-branch strategy.</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#apply">apply</a></li><li><a href="global.html#BareTrait">BareTrait</a></li><li><a href="global.html#Cached">Cached</a></li><li><a href="global.html#Dedupe">Dedupe</a></li><li><a href="global.html#expresses">expresses</a></li><li><a href="global.html#HasInstance">HasInstance</a></li><li><a href="global.html#isTraitificationOf">isTraitificationOf</a></li><li><a href="global.html#superclass">superclass</a></li><li><a href="global.html#Trait">Trait</a></li><li><a href="global.html#trait">trait</a></li><li><a href="global.html#traits">traits</a></li><li><a href="global.html#unwrap">unwrap</a></li><li><a href="global.html#wrap">wrap</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Mon May 11 2020 10:51:38 GMT-0500 (CDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
