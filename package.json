@@ -1,6 +1,6 @@
 {
   "name": "@northscaler/mutrait",
-  "version": "1.2.4-rc.0",
+  "version": "1.2.4",
   "description": "A simple, powerful trait applier for ES6+ classes",
   "repository": {
     "type": "git",
