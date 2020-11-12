@@ -15,39 +15,15 @@ stages:
   - build
   - publish
 
-build-8:
-  stage: build
-  image: node:8.17.0-alpine
-  script:
-    - npm run build
-
-build-9:
-  stage: build
-  image: node:9.11.2-alpine
-  script:
-    - npm run build
-
 build-10:
   stage: build
   image: node:10.20.1-alpine
   script:
     - npm run build
 
-build-11:
-  stage: build
-  image: node:11.15.0-alpine
-  script:
-    - npm run build
-
 build-12:
   stage: build
   image: node:12.16.3-alpine
-  script:
-    - npm run build
-
-build-13:
-  stage: build
-  image: node:13.14.0-alpine
   script:
     - npm run build
 
